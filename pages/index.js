@@ -10,7 +10,7 @@ export default function Home() {
   const getPosts = async () => {
     const collRef = collection(db, 'posts')
     const q = query(collRef, orderBy('timestamp', 'desc'))
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    const unsubscribe = onSnapshot(q, snapshot => {
       setAllPosts(snapshot.docs.map(doc => ({...doc.data(), id: doc.id})))
     })
     return unsubscribe
