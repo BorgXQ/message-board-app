@@ -1,14 +1,19 @@
 import Head from 'next/head'
 import Message from '@/components/Message'
+import { auth } from '@/utils/firebase'
+import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { db } from '@/utils/firebase'
 import { query, collection, onSnapshot, orderBy } from 'firebase/firestore'
 import Link from 'next/link'
 
 export default function Home() {
+  const route = useRouter()
   const [allPosts, setAllPosts] = useState([])
 
   const getPosts = async () => {
+    if (!auth.currentUser) route.push('/auth/login')
+
     const collRef = collection(db, 'posts')
     const q = query(collRef, orderBy('timestamp', 'desc'))
     const unsubscribe = onSnapshot(q, snapshot => {
@@ -30,10 +35,13 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className='my-12 text-lg font-medium'>
-        <h2>See what other people are saying</h2>
+        <h2 className='text-2xl text-center'>dashboard</h2>
         {allPosts.map(post => (
           <Message {...post}>
-            <Link href={{pathname: `/${post.id}`, query: {...post}}}>
+            <Link
+              href={{pathname: `/${post.id}`, query: {...post}}}
+              className='text-sm'
+            >
               <button>{post.comments?.length > 0 ? post.comments.length : 0} comments</button>
             </Link>
           </Message>
