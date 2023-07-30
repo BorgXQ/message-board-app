@@ -45,6 +45,9 @@ export default function Post() {
             })
 
             setPost({ description: '' })
+            toast.success('Post has been made 🚀🚀🚀', {
+                position: toast.POSITION.TOP_CENTER,
+                autoClose: 1500,})
             return route.push('/')
         }
     }
