@@ -2,13 +2,14 @@ import { auth, db } from '@/utils/firebase'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore'
+import { addDoc, collection, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { toast } from 'react-toastify'
 
 export default function Post() {
     const [post, setPost] = useState({ description: '' })
     const [user, loading] = useAuthState(auth)
     const route = useRouter()
+    const routeData = route.query
 
     const submitPost = async (e) => {
         e.preventDefault()
@@ -28,23 +29,46 @@ export default function Post() {
             return
         }
 
-        const collRef = collection(db, 'posts')
-        await addDoc(collRef, {
-            ...post,
-            timestamp: serverTimestamp(),
-            user: user.uid,
-            avatar: user.photoURL,
-            username: user.displayName,
-        })
+        if (post?.hasOwnProperty('id')) {
+            const docRef = doc(db, 'posts', post.id)
+            const updatedPost = {...post, timestamp: serverTimestamp()}
+            await updateDoc(docRef, updatedPost)
+            return route.push('/')
+        } else {
+            const collRef = collection(db, 'posts')
+            await addDoc(collRef, {
+                ...post,
+                timestamp: serverTimestamp(),
+                user: user.uid,
+                avatar: user.photoURL,
+                username: user.displayName,
+            })
 
-        setPost({ description: '' })
-        return route.push('/')
+            setPost({ description: '' })
+            return route.push('/')
+        }
     }
+
+    const checkUser = async () => {
+        if (loading) return
+        if (!user) router.push('/auth/login')
+
+        if (routeData.id) {
+            setPost({ description: routeData.description, id: routeData.id})
+        }
+    }
+
+    useEffect(() => {
+        checkUser()
+    }, [user, loading])
+
 
     return (
         <div className='my-20 p-12 shadow-lg rounded-lg max-w-md mx-auto'>
             <form onSubmit={submitPost}>
-                <h1 className='text-2xl font-bold'>Create a new post</h1>
+                <h1 className='text-2xl font-bold'>
+                    {post.hasOwnProperty('id') ? 'Edit your post' : 'Create a new post'}
+                </h1>
                 <div className='py-2'>
                     <h3 className='text-lg font-medium py-2'>Description</h3>
                     <textarea
