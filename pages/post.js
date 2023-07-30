@@ -2,7 +2,7 @@ import { auth, db } from '@/utils/firebase'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import { addDoc, collection, serverTimestamp, updateDoc } from 'firebase/firestore'
+import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore'
 import { toast } from 'react-toastify'
 
 export default function Post() {
